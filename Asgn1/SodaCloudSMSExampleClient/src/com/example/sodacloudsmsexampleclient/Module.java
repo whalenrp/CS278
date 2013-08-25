@@ -10,6 +10,7 @@ package com.example.sodacloudsmsexampleclient;
  */
 public interface Module {
 
+
 	/**
 	 * 
 	 * This method returns the component that is bound to a given

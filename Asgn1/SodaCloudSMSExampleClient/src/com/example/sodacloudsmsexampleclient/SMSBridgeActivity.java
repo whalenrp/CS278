@@ -38,7 +38,7 @@ public class SMSBridgeActivity extends Activity implements AndroidSodaListener {
 	 * ObjRefExtractor --> QRCodeObjRefExtractor
 	 * 
 	 */
-	private Module configuration_;
+	private Module configuration_ = new ModuleImpl();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +50,9 @@ public class SMSBridgeActivity extends Activity implements AndroidSodaListener {
 		String ref = getIntent().getStringExtra("ref");
 		String server = ref.substring(0,ref.indexOf("|"));
 		objRef_ = ref.substring(ref.indexOf("|")+1);
+
+        configuration_.setComponent(SMSManager.class, new SMSManagerImpl(this));
+        configuration_.setComponent(ObjRefExtractor.class, new QRCodeObjRefExtractor());
 		
 		AndroidSoda.init(this, new DefaultProtocol(), server, "/sms/", 8081, this);
 	}

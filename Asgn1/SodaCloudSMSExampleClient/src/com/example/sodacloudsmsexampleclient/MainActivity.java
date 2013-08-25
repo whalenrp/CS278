@@ -9,6 +9,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.magnum.soda.example.sms.SMSManager;
+import org.magnum.soda.example.sms.SMSManagerImpl;
+
 public class MainActivity extends Activity {
 
 	private Button connect_;
@@ -27,7 +30,7 @@ public class MainActivity extends Activity {
 	 * ObjRefExtractor --> QRCodeObjRefExtractor
 	 * 
 	 */
-	private Module configuration_;
+	private Module configuration_ = new ModuleImpl();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +61,9 @@ public class MainActivity extends Activity {
 				initiateScan();
 			}
 		});
+
+        configuration_.setComponent(SMSManager.class, new SMSManagerImpl(this));
+        configuration_.setComponent(ObjRefExtractor.class, new QRCodeObjRefExtractor());
 	}
 
 	@Override
@@ -93,6 +99,7 @@ public class MainActivity extends Activity {
 
 			} else if (resultCode == RESULT_CANCELED) {
 				// Handle cancel
+                Toast.makeText(this, "QR scan canceled", Toast.LENGTH_LONG).show();
 			}
 		}
 	}

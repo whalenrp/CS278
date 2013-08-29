@@ -64,14 +64,18 @@ public class AnExampleUnitTest {
     //@Mock
     //Path mockPath;
     @Test
-    public void testFileStates() throws Exception{
-        Path mockPath = mock(Path.class);
+    public void testDropboxCmdProcessor() throws Exception{
+    	
+    	Path mockPath = mock(Path.class);
+    	FileStateTestImpl testImpl = new FileStateTestImpl();
     	DropboxCmdProcessor processor = new DropboxCmdProcessor(
-                new FileStateTestImpl(),
+                testImpl,
                 new DefaultFileManager(mockPath));
 
-        DropboxCmd cmd = new DropboxCmd();
+        DropboxCmd cmd = mock(DropboxCmd.class);
         when(cmd.getOpCode()).thenReturn(OpCode.REMOVE);
+        processor.updateFileState(cmd, mockPath);
+        assertEquals(testImpl.getState(mockPath).getSize(),-1);
     }
 
 	@Test
@@ -100,11 +104,11 @@ public class AnExampleUnitTest {
 		// Real objects can't tell the difference between our mock object
 		// and the real deal
 		DropboxFileEventHandler hdlr = new DropboxFileEventHandler(
-					new DefaultFileManager(Paths.get("test-data/working-dir")),
+					new DefaultFileManager(Paths.get("test-data/files")),
 					new FileStatesImpl(),
 					transport);
 		
-		Path p = Paths.get("some_test_path");
+		Path p = Paths.get("test1.txt");
 		FileEvent evt = new FileEvent(ENTRY_CREATE, p);
 		hdlr.handle(evt);
 		

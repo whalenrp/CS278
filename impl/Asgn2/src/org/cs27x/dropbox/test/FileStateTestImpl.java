@@ -10,20 +10,20 @@ import java.nio.file.Path;
  * Created by richard on 8/29/13.
  */
 public class FileStateTestImpl implements FileStates{
-
+	private FileState state = new FileState(0,FileTime.fromMillis(777));
     @Override
     public FileState getState(Path p){
-        return new FileState(777,FileTime.fromMillis(777));
+        return state;
     }
 
     @Override
     public FileState getOrCreateState(Path p){
-        return new FileState(777,FileTime.fromMillis(777));
+        return state;
     }
 
     @Override
     public FileState insert(Path p) throws IOException{
-        return new FileState(777,FileTime.fromMillis(777));
+        return state;
     }
 
     @Override

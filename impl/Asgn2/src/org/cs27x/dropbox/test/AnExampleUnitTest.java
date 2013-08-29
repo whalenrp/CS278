@@ -14,11 +14,16 @@ import java.util.logging.FileHandler;
 
 import org.cs27x.dropbox.DefaultFileManager;
 import org.cs27x.dropbox.Dropbox;
+import org.cs27x.dropbox.DropboxCmd;
+import org.cs27x.dropbox.DropboxCmd.OpCode;
+import org.cs27x.dropbox.DropboxCmdProcessor;
 import org.cs27x.dropbox.DropboxProtocol;
 import org.cs27x.filewatcher.DropboxFileEventHandler;
 import org.cs27x.filewatcher.FileEvent;
-import org.cs27x.filewatcher.FileStates;
+import org.cs27x.filewatcher.FileStatesImpl;
 import org.junit.Test;
+
+
 
 /**
  * Please give your tests rational names that are related to what you are
@@ -56,6 +61,18 @@ public class AnExampleUnitTest {
 	 * 
 	 * @throws Exception
 	 */
+    //@Mock
+    //Path mockPath;
+    @Test
+    public void testFileStates() throws Exception{
+        Path mockPath = mock(Path.class);
+    	DropboxCmdProcessor processor = new DropboxCmdProcessor(
+                new FileStateTestImpl(),
+                new DefaultFileManager(mockPath));
+
+        DropboxCmd cmd = new DropboxCmd();
+        when(cmd.getOpCode()).thenReturn(OpCode.REMOVE);
+    }
 
 	@Test
 	public void aBadTest() throws Exception {
@@ -84,7 +101,7 @@ public class AnExampleUnitTest {
 		// and the real deal
 		DropboxFileEventHandler hdlr = new DropboxFileEventHandler(
 					new DefaultFileManager(Paths.get("test-data/working-dir")),
-					new FileStates(),
+					new FileStatesImpl(),
 					transport);
 		
 		Path p = Paths.get("some_test_path");

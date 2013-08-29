@@ -12,10 +12,10 @@ import org.cs27x.dropbox.FileManager;
 public class DropboxFileEventHandler implements FileEventHandler {
 
 	private final DropboxProtocol transport_;
-	private final FileStates fileStates_;
+	private final FileStatesImpl fileStates_;
 	private final FileManager fileHandler_;
 
-	public DropboxFileEventHandler(FileManager hdlr, FileStates states,
+	public DropboxFileEventHandler(FileManager hdlr, FileStatesImpl states,
 			DropboxProtocol transport) {
 		super();
 		fileStates_ = states;

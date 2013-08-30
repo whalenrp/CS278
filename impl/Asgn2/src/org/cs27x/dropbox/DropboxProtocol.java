@@ -7,7 +7,7 @@ import java.nio.file.Path;
 
 import org.apache.commons.io.IOUtils;
 import org.cs27x.dropbox.DropboxCmd.OpCode;
-import org.cs27x.filewatcher.FileStatesImpl;
+import org.cs27x.filewatcher.FileStates;
 
 public class DropboxProtocol {
 
@@ -15,7 +15,7 @@ public class DropboxProtocol {
 	
 	private final DropboxCmdProcessor cmdProcessor_;
 
-	public DropboxProtocol(DropboxTransport transport, FileStatesImpl states, FileManager filemgr) {
+	public DropboxProtocol(DropboxTransport transport, FileStates states, FileManager filemgr) {
 		transport_ = transport;
 		cmdProcessor_ = new DropboxCmdProcessor(states,filemgr);
 		transport_.addListener(cmdProcessor_);
@@ -30,47 +30,35 @@ public class DropboxProtocol {
 	}
 
 	public void addFile(Path p) {
-		DropboxCmd cmd = new DropboxCmd();
-		cmd.setOpCode(OpCode.ADD);
-		cmd.setPath(p.getFileName().toString());
-
-		try {
-
-			try (InputStream in = Files.newInputStream(p)) {
-				byte[] data = IOUtils.toByteArray(in);
-				cmd.setData(data);
-			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		publish(cmd);
+		publish(getDropboxCmd(p,OpCode.ADD));
 	}
 
 	public void removeFile(Path p) {
-		DropboxCmd cmd = new DropboxCmd();
-		cmd.setOpCode(OpCode.REMOVE);
-		cmd.setPath(p.getFileName().toString());
-		publish(cmd);
+		publish(getDropboxCmd(p,OpCode.REMOVE));
 	}
 
 	public void updateFile(Path p) {
+		publish(getDropboxCmd(p,OpCode.UPDATE));
+	}
+	
+	private DropboxCmd getDropboxCmd(Path p, OpCode op){
 		DropboxCmd cmd = new DropboxCmd();
-		cmd.setOpCode(OpCode.UPDATE);
+		cmd.setOpCode(OpCode.ADD);
 		cmd.setPath(p.getFileName().toString());
-		try {
-
-			try (InputStream in = Files.newInputStream(p)) {
-				byte[] data = IOUtils.toByteArray(in);
-				cmd.setData(data);
+		
+		if (op == OpCode.ADD || op == OpCode.UPDATE){
+			try {
+	
+				try (InputStream in = Files.newInputStream(p)) {
+					byte[] data = IOUtils.toByteArray(in);
+					cmd.setData(data);
+				}
+	
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
-
-		publish(cmd);
+		return cmd;
 	}
 
 

@@ -61,11 +61,20 @@ public class AnExampleUnitTest {
 	 * 
 	 * @throws Exception
 	 */
+	
+	// Test the DropboxProtocol class' consolidations
+	// update and add should set byte data, and all of them
+	// should set opcode and path
+	public void testDropboxProtocol(){
+		
+	}
+	
     //@Mock
     //Path mockPath;
     @Test
-    public void testDropboxCmdProcessor() throws Exception{
+    public void testDropboxCmdProcessor() {
     	
+    	// Test the file removed condition
     	Path mockPath = mock(Path.class);
     	FileStateTestImpl testImpl = new FileStateTestImpl();
     	DropboxCmdProcessor processor = new DropboxCmdProcessor(
@@ -76,44 +85,47 @@ public class AnExampleUnitTest {
         when(cmd.getOpCode()).thenReturn(OpCode.REMOVE);
         processor.updateFileState(cmd, mockPath);
         assertEquals(testImpl.getState(mockPath).getSize(),-1);
+        
+        // Test the file created/updated condition
     }
+    
 
-	@Test
-	public void aBadTest() throws Exception {
-		// This is a really poor test
-		Dropbox dropbox = new Dropbox(Paths.get("./"));
-		// dropbox.connect(null);
-
-		// Using a simple JUnit assertion
-		assertNotNull(dropbox);
-	}
-
-	@Test
-	public void aBadTestWithAMockObject() throws Exception {
-		//Creating a mock object
-		DropboxProtocol transport = mock(DropboxProtocol.class);
-		
-		// An example of stubbing a mock object to make it behave
-		// like you want.
-		when(transport.toString()).thenReturn("1234");
-		
-		// A simple test to prove that the stubbing above worked..
-		// you don't need to test your stubs
-		assertEquals("1234",transport.toString());
-		
-		// Real objects can't tell the difference between our mock object
-		// and the real deal
-		DropboxFileEventHandler hdlr = new DropboxFileEventHandler(
-					new DefaultFileManager(Paths.get("test-data/files")),
-					new FileStatesImpl(),
-					transport);
-		
-		Path p = Paths.get("test1.txt");
-		FileEvent evt = new FileEvent(ENTRY_CREATE, p);
-		hdlr.handle(evt);
-		
-		// Make sure that transport made a call to our mock object
-		// like we expected
-		verify(transport,times(1)).addFile(eq(p));
-	}
+//	@Test
+//	public void aBadTest() throws Exception {
+//		// This is a really poor test
+//		Dropbox dropbox = new Dropbox(Paths.get("./"));
+//		// dropbox.connect(null);
+//
+//		// Using a simple JUnit assertion
+//		assertNotNull(dropbox);
+//	}
+//
+//	@Test
+//	public void aBadTestWithAMockObject() throws Exception {
+//		//Creating a mock object
+//		DropboxProtocol transport = mock(DropboxProtocol.class);
+//		
+//		// An example of stubbing a mock object to make it behave
+//		// like you want.
+//		when(transport.toString()).thenReturn("1234");
+//		
+//		// A simple test to prove that the stubbing above worked..
+//		// you don't need to test your stubs
+//		assertEquals("1234",transport.toString());
+//		
+//		// Real objects can't tell the difference between our mock object
+//		// and the real deal
+//		DropboxFileEventHandler hdlr = new DropboxFileEventHandler(
+//					new DefaultFileManager(Paths.get("test-data/files")),
+//					new FileStatesImpl(),
+//					transport);
+//		
+//		Path p = Paths.get("test1.txt");
+//		FileEvent evt = new FileEvent(ENTRY_CREATE, p);
+//		hdlr.handle(evt);
+//		
+//		// Make sure that transport made a call to our mock object
+//		// like we expected
+//		verify(transport,times(1)).addFile(eq(p));
+//	}
 }

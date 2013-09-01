@@ -1,32 +1,24 @@
 package org.cs27x.dropbox.test;
 
-import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
-import static org.mockito.Matchers.eq;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
-import java.util.logging.FileHandler;
 
 import org.cs27x.dropbox.DefaultFileManager;
-import org.cs27x.dropbox.Dropbox;
 import org.cs27x.dropbox.DropboxCmd;
 import org.cs27x.dropbox.DropboxCmd.OpCode;
 import org.cs27x.dropbox.DropboxCmdProcessor;
-import org.cs27x.dropbox.DropboxProtocol;
 import org.cs27x.dropbox.FileManager;
-import org.cs27x.filewatcher.DropboxFileEventHandler;
 import org.cs27x.filewatcher.FileEvent;
 import org.cs27x.filewatcher.FileState;
 import org.cs27x.filewatcher.FileStates;
-import org.cs27x.filewatcher.FileStatesImpl;
 import org.junit.Test;
 
 /**
@@ -66,26 +58,37 @@ public class TestDropboxCmdProcessor {
 	 * @throws Exception
 	 */
 
-	public void testDropboxCmdProcessorCmdReceived() throws IOException{
-		FileManager mgr = new DefaultFileManager(Paths.get("./"));
-		mock(FileStates.class);
+	// Testing cmdProcessor with mock FileManager and FileStates objects.
+	// Step 2 of exercise.
+	@Test
+	public void testDropboxCmdProcessorWithMock() throws IOException{
+		FileManager mgr = mock(FileManager.class);
+		FileStates states = mock(FileStates.class);
+		FileState state  = new FileState(0,FileTime.fromMillis(0));
+		when(states.getState(any(Path.class))).thenReturn(state);
+		when(states.getOrCreateState(any(Path.class))).thenReturn(state);
 		//FileStates states = new FileStatesImpl();
 		//states.insert(Paths.get("./"));
 		DropboxCmdProcessor processor = new DropboxCmdProcessor(states, mgr);
 		
 		DropboxCmd cmdAdd = new DropboxCmd();
-		cmdAdd.setData("Hello, world".getBytes());
+		byte[] data = new String("Helo, world").getBytes();
+		cmdAdd.setData(data);
 		cmdAdd.setOpCode(OpCode.ADD);
 		cmdAdd.setPath("foo");
 		
-		processor.cmdReceived(cmdAdd);
+		processor.updateFileState(cmdAdd,Paths.get("."));
+		
+		assertEquals("State sizes unequal after call to updateFileState",state.getSize(), data.length);
+		assertFalse("Last Modified time for state incorrectly set after call to DropboxCmdProcessor.updateFileState",
+				state.getLastModificationDate() == FileTime.fromMillis(0));
 		
 		
-		DropboxCmd cmdDel = new DropboxCmd();
-		cmdDel.setOpCode(OpCode.ADD);
-		cmdDel.setPath("foo");
-		
-		processor.cmdReceived(cmdDel);
+//		DropboxCmd cmdDel = new DropboxCmd();
+//		cmdDel.setOpCode(OpCode.ADD);
+//		cmdDel.setPath("foo");
+//		
+//		processor.cmdReceived(cmdDel);
 	}
 
 	// @Mock

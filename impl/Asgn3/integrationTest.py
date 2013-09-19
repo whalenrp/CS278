@@ -5,7 +5,8 @@ import socket
 FNULL = open(os.devnull, 'w')
 
 # Start the server, keeping a handle to it for cleanup purposes.
-args = shlex.split("java -cp 'src;libs/*;bin;' org.cs27x.dropbox.Dropbox test-server")
+#args = shlex.split("java -cp 'src;libs/*;bin;' org.cs27x.dropbox.Dropbox test-server")
+args = shlex.split("java -cp './*' org.cs27x.dropbox.Dropbox test-server")
 #procServer = subprocess.Popen(args, stdout=FNULL, stderr=FNULL)
 procServer = subprocess.Popen(args)
 

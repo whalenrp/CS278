@@ -1,0 +1,37 @@
+<project name="ReceiptListServer" default="compile" basedir=".">
+
+  <property name="build.home"    value="${basedir}"/>
+  <property name="src.home"      value="${basedir}/src"/>
+
+  <path id="compile.classpath">
+
+    <pathelement location="${build.home}/bin"/>
+
+    <fileset dir="${build.home}/libs">
+      <include name="*.jar"/>
+    </fileset>
+
+  </path>
+
+  <target name="all" depends="clean,compile"
+   description="Clean build and dist directories, then compile"/>
+
+  <target name="clean"
+   description="Delete old build and dist directories">
+    <delete dir="${build.home}/bin"/>
+  </target>
+
+  <target name="compile"
+   description="Compile Java sources">
+
+    <!-- Compile Java classes as necessary -->
+    <mkdir    dir="${build.home}/bin"/>
+    <javac includeantruntime="false"
+	  srcdir="${src.home}"
+          destdir="${build.home}/bin">
+        <classpath refid="compile.classpath"/>
+    </javac>
+
+  </target>
+
+</project>

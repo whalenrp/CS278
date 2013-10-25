@@ -14,7 +14,7 @@ public class BackupGeneratorReceiptList extends BackupGenerator {
 		OutputStream out = new FileOutputStream("client_" + clientNumber + "_ReceiptData.txt");
 		
 		System.out.println("Accepted connection from client #" + clientNumber);
-		System.out.println(" Writing to file clientData" + clientNumber + ".txt");
+		System.out.println(" Writing Receipt database to backup file...");
 		
 		// Write bytes to file.
 		byte[] buffer = new byte[1024];

@@ -11,10 +11,12 @@ Because the client side of this application is an Android app and emulator setup
 different computers, I have written only an integration test only for the server side of the application
 which tests the format of incoming data (namely, that the first byte represents the customer id and the
 second byte is used for the type of data being stored). If you wish to test the functionality of the
-application from start to finish, however, I have provided an image file from my emulator which contains
-an entry of dummy test data. To use it, copy "userdata-qemu.img" from this directory to your emulator's
-data directory (typically found at ~/.android/avd on OSX, Linux or C:\Users\<user>\.android\ and then
-into the specific emulator's directory you want to use). First, start the server by running "vagrant up"
-in this directory and then load the ReceiptList app in the android emulator. Pull the navigation drawer
-out from the left side of the screen and click "Export to Server." This will forward the data from 
-the emulator through your localhost and into the virtual machine for storage. 
+application from start to finish, however, I have provided an image file of my emulator's sql database,
+which contains a dummy entry for testing purposes. To use it, start up your emulator with eclipse, open
+the MobileReceipts application, and
+run "adb push data /data/data/com.hci.prototype.mobilereceipts/databases/data" from the command line
+(I needed to run this command in cygwin for it to work on Windows).
+Once the database has been copied to the emulator, start the virtual machine by running "vagrant up" on 
+the command line. It will automatically run the server-side app. To manually trigger a database backup
+with the server, pull the navigation drawer out from the left side of the emulator and click "Export to 
+Server." It will write the backup data to the vagrant directory.

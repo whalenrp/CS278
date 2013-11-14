@@ -38,6 +38,41 @@ class Test_Suite:
         assert len(self.a.retrieve_all_receipts("test_user","test_pass")) == 1
     
     #Test that a receipt can be stored (with creds)
+    def test_store_receipt(self):
+        test_r = Receipt("12/12/12","Walmart",10.0)
+        assert self.a.add_receipt("test_user","test_pass",test_r) == True
+        records = self.a.receipts.find({"username":"test_user",
+                                        "receipt":{"date":"12/12/12",
+                                                    "store":"Walmart",
+                                                    "total":10}})
+        assert records.count() == 1
+        assert Receipt(json=records[0]["receipt"]) == test_r
+        self.a.receipts.remove({"username":"test_user","receipt.date":"12/12/12",
+                                "receipt.store":"Walmart","receipt.total":10})
+    
     #Test that a recept can not be stored without valid creds
-    #Test that all the records for an account can be retreived
-
+    def test_store_unauthorized_receipt(self):
+        test_r = Receipt("this","won't work",0)
+        num_receipts = self.a.receipts.find().count()
+        assert self.a.add_receipt("test_user","fake_pass",test_r) == False
+        assert self.a.add_receipt("fake_user","fake_pass",test_r) == False
+        assert num_receipts == self.a.receipts.find().count()
+    
+    #Test receipt serialization
+    def test_serialization(self):
+        serial = {"date":"1/1/2013","store":"Target","total":0.0}
+        assert self.r.serialize() == serial
+    
+    #Test receipt equality
+    def test_receipt_equality(self):
+       r1 = Receipt("1/1/2013","Target",0.0)
+       r2 = Receipt(json={"date":"1/1/2013","store":"Target","total":0.0})
+       assert r1 == r2
+       assert r2 == r1
+       assert r1 == self.r
+       assert r2 == self.r
+       r1.store = "Walmart"
+       assert not r1 == r2
+       assert not r1 == self.r
+       r2.total = 1.0
+       assert not r2 == self.r

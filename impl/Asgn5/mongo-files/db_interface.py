@@ -73,29 +73,44 @@ class AccountsWrapper():
 
 class Receipt():
     
-    def __init__(self, date="1/1/2013", store="Target", total=0.00 ,json=None):
+    def __init__(self,_id=100,title="The Title",amount=10.0,filename="some_file.png",
+                    category="payment",kind="casual",date="12-12-2012",json=None):
         """
         Can construct self based off of individual parameters or off of a 
         json/dict structure
         """
         if json==None:
-            self.date = date
-            self.store = store
-            self.total = total
+            self._id=_id
+            self.title=title
+            self.amount=amount
+            self.filename=filename
+            self.category=category
+            self.kind=kind
+            self.date=date
         else:
-            self.date = json["date"]
-            self.store = json["store"]
-            self.total = json["total"]
+            self._id=json["_id"]
+            self.title=json["title"]
+            self.amount=json["amount"]
+            self.filename=json["filename"]
+            self.category=json["category"]               
+            self.kind=json["kind"]
+            self.date=json["date"]
         
     def __eq__(self,other):
-        d = self.date == other.date
-        s = self.store == other.store
-        t = self.total == other.total
-        return d and s and t
+       i = self._id == other._id
+       t = self.title == other.title
+       a = self.amount == other.amount
+       f = self.filename == other.filename
+       c = self.category == other.category
+       k = self.kind == other.kind
+       d = self.date == other.date
+       return i and t and a and f and c and k and d
     
     def serialize(self):
         """
         returns a dictionary representation of self
         """
-        return {"date":self.date,"store":self.store,"total":self.total}
+        return {"_id":self._id,"title":self.title,"amount":self.amount,
+                "filename":self.filename,"category":self.category,
+                "kind":self.kind,"date":self.date}
 

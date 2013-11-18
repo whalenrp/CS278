@@ -45,7 +45,7 @@ class AccountsWrapper():
     def retrieve_all_receipts(self,username,password):
         """
         This function checks to see if the username and password are valid.
-        If they are, all the receipts associated with the username are retreived.
+
         A list of matching Receipt objects is returned.
         """
         if  self._are_valid_credentials(username,password) == 1:
@@ -73,7 +73,7 @@ class AccountsWrapper():
 
 class Receipt():
     
-    def __init__(self,_id=100,title="The Title",amount=10.0,filename="some_file.png",
+    def __init__(self,_id="100",title="The Title",amount="10.00",filename="some_file.png",
                     category="payment",kind="casual",date="12-12-2012",json=None):
         """
         Can construct self based off of individual parameters or off of a 

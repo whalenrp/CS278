@@ -39,12 +39,12 @@ class Test_Suite:
     
     #Test that a receipt can be stored (with creds)
     def test_store_receipt(self):
-        test_r = Receipt(100,"The Title",10.0,"some_file.png","payments",
+        test_r = Receipt("100","The Title","10.00","some_file.png","payments",
                         "casual","12-12-2012")
         assert self.a.add_receipt("test_user","test_pass",test_r) == True
         records = self.a.receipts.find({"username":"test_user",
-                                        "receipt":{"_id":100,"title":"The Title",
-                                                    "amount":10.0,
+                                        "receipt":{"_id":"100","title":"The Title",
+                                                    "amount":"10.00",
                                                     "filename":"some_file.png",
                                                     "category":"payments",
                                                     "kind":"casual",
@@ -52,14 +52,14 @@ class Test_Suite:
         assert records.count() == 1
         assert Receipt(json=records[0]["receipt"]) == test_r
         self.a.receipts.remove({"username":"test_user",
-                                "receipt":{"_id":100,"title":"The Title",
-                                "amount":10.0,"filename":"some_file.png",
+                                "receipt":{"_id":"100","title":"The Title",
+                                "amount":"10.00","filename":"some_file.png",
                                 "category":"payments","kind":"casual",
                                 "date":"12-12-2012"}})
     
     #Test that a recept can not be stored without valid creds
     def test_store_unauthorized_receipt(self):
-        test_r = Receipt(0,"this",0,"won't","work","ever","10/12/13")
+        test_r = Receipt("0","this","0","won't","work","ever","10/12/13")
         num_receipts = self.a.receipts.find().count()
         assert self.a.add_receipt("test_user","fake_pass",test_r) == False
         assert self.a.add_receipt("fake_user","fake_pass",test_r) == False
@@ -67,14 +67,14 @@ class Test_Suite:
     
     #Test receipt serialization
     def test_serialization(self):
-        serial = {"_id":100,"title":"The Title","amount":10.0, "filename":"some_file.png",
+        serial = {"_id":"100","title":"The Title","amount":"10.00", "filename":"some_file.png",
                  "category":"payment","kind":"casual","date":"12-12-2012"}
         assert self.r.serialize() == serial
     
     #Test receipt equality
     def test_receipt_equality(self):
-       r1 = Receipt(100,"The Title",10.0,"some_file.png","payment","casual","12-12-2012")
-       r2 = Receipt(json={"_id":100,"title":"The Title","amount":10.0, 
+       r1 = Receipt("100","The Title","10.00","some_file.png","payment","casual","12-12-2012")
+       r2 = Receipt(json={"_id":"100","title":"The Title","amount":"10.00", 
                             "filename":"some_file.png","category":"payment",
                             "kind":"casual","date":"12-12-2012"})
        assert r1 == r2
@@ -84,5 +84,5 @@ class Test_Suite:
        r1.title = "Walmart"
        assert not r1 == r2
        assert not r1 == self.r
-       r2.amount = 1.0
+       r2.amount = "1.0"
        assert not r2 == self.r

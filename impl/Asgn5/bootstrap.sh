@@ -20,6 +20,7 @@ sudo easy_install nose
   sudo echo "JYTHON_HOME=/usr/lib/jvm/jython" | sudo tee -a /etc/environment
   export JYTHON_HOME=/user/lib/jvm/jython
   source /etc/environment
+  cp $JYTHON_HOME/jython.jar /home/vagrant/share/ReceiptListServer/libs/
 
 set -e
 

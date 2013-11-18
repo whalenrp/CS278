@@ -3,6 +3,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Scanner;
 
 import org.junit.After;
@@ -46,6 +47,23 @@ public class BackupReceiptListTest {
 		String output = reader.nextLine();
 		assertEquals(output, "Hello, World!");
 		reader.close();
+	}
+	
+	@Test
+	public void testJythonFactory(){
+		final String PYTHONPATH = "../../mongo-files";
+        final String[] sysPathAappends = PYTHONPATH.split(":");
+        
+        JythonObjectFactory accountsFactory = new JythonObjectFactory(IAccountsWrapper.class,"db_interface","AccountsWrapper",sysPathAappends);
+        JythonObjectFactory receiptsFactory = new JythonObjectFactory(IReceipt.class,"db_interface","Receipt",sysPathAappends);
+        
+        IAccountsWrapper accounts = (IAccountsWrapper) accountsFactory.createObject();
+        IReceipt receipt = (IReceipt) receiptsFactory.createObject();
+        
+        //accounts.add_account("test_user", "test_pass"); currently, no way to clean this up after testing, in java
+
+        List<IReceipt> results = accounts.retrieve_all_receipts("test_user", "test_pass");
+        assertEquals(0, results.size());
 	}
 
 }

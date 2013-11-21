@@ -13,14 +13,6 @@ sudo easy_install nose
   sudo apt-get install -y mongodb-10gen
   sudo pip install pymongo
 
-# install jython
-  sudo apt-get install -y curl
-  curl http://search.maven.org/remotecontent?filepath=org/python/jython-installer/2.7-b1/jython-installer-2.7-b1.jar -O jython-installer-2.7-b1.jar
-  sudo java -jar jython-installer-2.7-b1.jar -s -d /usr/lib/jvm/jython
-  sudo echo "JYTHON_HOME=/usr/lib/jvm/jython" | sudo tee -a /etc/environment
-  export JYTHON_HOME=/user/lib/jvm/jython
-  source /etc/environment
-  cp $JYTHON_HOME/jython.jar /home/vagrant/share/ReceiptListServer/libs/
 
 set -e
 

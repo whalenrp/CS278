@@ -26,4 +26,4 @@ set -e
 
 cd /vagrant/ReceiptListServer
 ant all
-cd bin; java ReceiptListServer
+#cd bin; java ReceiptListServer

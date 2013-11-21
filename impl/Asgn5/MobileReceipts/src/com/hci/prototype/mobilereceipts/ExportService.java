@@ -20,8 +20,11 @@ public class ExportService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent arg0) {
 		
-		AbstractExporter mExporter = new ConcreteReceiptExporter(getApplicationContext());
-		mExporter.connectAndSendData("10.0.2.2", 8080);
+		AbstractExporter exporter = new JsonReceiptExporter(getApplicationContext());
+		exporter.connectAndSendData("http://10.0.2.2:8080/sync", 8080);
+		
+//		AbstractExporter mExporter = new ConcreteReceiptExporter(getApplicationContext());
+//		mExporter.connectAndSendData("10.0.2.2", 8080);
 		
 	}
 

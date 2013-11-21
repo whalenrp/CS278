@@ -1,42 +1,31 @@
-import java.io.InputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
 
+import com.sun.net.httpserver.HttpServer;
 
-public class ReceiptListServer {
-	
-	private static final int RECEIPT_DATA = 1;
-		public static void main(String[] args) throws Exception{
-			System.out.println("Waiting for connection");
-			ServerSocket mServerSocket = new ServerSocket(8080);
-			Socket mSocket = mServerSocket.accept();
+public class ReceiptListServer
+{
+	private static final int DEFAULT_PORT = 8080;
+	private static final String ALL_RECEIPTS_PATH = "/user";
+	private static final String SYNC_RECEIPTS_PATH = "/sync";
 
-			
-			
-			InputStream in = mSocket.getInputStream();
-			
-			// Get the client number and data type out of the first 2 bytes of the transmission
-			int appNumber = in.read();
-			int dataType = in.read();
-			BackupGenerator backupGenerator = null;
-			switch(dataType){
-				case RECEIPT_DATA:
-					backupGenerator = new BackupGeneratorReceiptList();
-					break;
-				default:
-					System.out.println("Client: " + appNumber);
-					System.out.println("Type: " + dataType);
-					in.close();
-					mServerSocket.close();
-					mSocket.close();
-					throw new UnsupportedOperationException();
-			}
-			
-			backupGenerator.processStream(in, appNumber);
-			
-			// Cleanup
-			in.close();
-			mSocket.close();
-			mServerSocket.close();
+	public static void main(String[] args) throws Exception
+	{
+		InetSocketAddress address = new InetSocketAddress(DEFAULT_PORT);
+		HttpServer httpServer;
+		try
+		{
+			httpServer = HttpServer.create(address, 0);
+			httpServer.createContext(ALL_RECEIPTS_PATH, new AllReceiptsHandler());
+			httpServer.createContext(SYNC_RECEIPTS_PATH, new SyncReceiptsHandler());
+			httpServer.setExecutor(Executors.newCachedThreadPool());
+			httpServer.start();
+			System.out.println("Server started and listening on port " + DEFAULT_PORT);
 		}
+		catch (IOException e)
+		{
+			System.out.println("Error starting server");
+		}
+	}
 }

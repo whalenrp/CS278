@@ -45,7 +45,6 @@ class AccountsWrapper():
     def retrieve_all_receipts(self,username,password):
         """
         This function checks to see if the username and password are valid.
-
         A list of matching Receipt objects is returned.
         """
         if  self._are_valid_credentials(username,password) == 1:

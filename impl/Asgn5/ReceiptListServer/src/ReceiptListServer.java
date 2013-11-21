@@ -6,7 +6,7 @@ import com.sun.net.httpserver.HttpServer;
 
 public class ReceiptListServer
 {
-	private static final int DEFAULT_PORT = 8080;
+	private static final int DEFAULT_PORT = 80;
 	private static final String ALL_RECEIPTS_PATH = "/user";
 	private static final String SYNC_RECEIPTS_PATH = "/sync";
 

@@ -1,9 +1,23 @@
 import pymongo
 from pymongo import MongoClient
+try: # Jython requires an import of a Java interface that the classes inherit from
+    import IAccountsWrapper
+except ImportError:
+    # If working in pure Python, define it so that the code still works
+    class IAccountsWrapper:
+        def __init__(self):
+       	    pass
+try:
+    import IReceipt
+except ImportError:
+    class IReceipt:
+        def __init(self):
+            pass
+
 
 #guest_user = {"username":"guest", "password":"guest"}
 
-class AccountsWrapper():
+class AccountsWrapper(IAccountsWrapper):
     """
     This class will be a wrapper for the pymongo internals of managing 
     accounts and their corresponding data from the MobileReceipts project.
@@ -70,7 +84,7 @@ class AccountsWrapper():
             return False
 
 
-class Receipt():
+class Receipt(IReceipt):
     
     def __init__(self,_id="100",title="The Title",amount="10.00",filename="some_file.png",
                     category="payment",kind="casual",date="12-12-2012",json=None):
@@ -105,6 +119,9 @@ class Receipt():
        d = self.date == other.date
        return i and t and a and f and c and k and d
     
+    def equals(self, other):
+        return self.__eq__(other)
+
     def serialize(self):
         """
         returns a dictionary representation of self

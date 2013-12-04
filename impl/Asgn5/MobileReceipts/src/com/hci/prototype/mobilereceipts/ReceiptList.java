@@ -1,27 +1,23 @@
 package com.hci.prototype.mobilereceipts;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,13 +25,10 @@ import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.ExpandableListView.OnGroupClickListener;
-import android.widget.ExpandableListView.OnGroupCollapseListener;
-import android.widget.ExpandableListView.OnGroupExpandListener;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 /*
  * This class will be the main entry point of the application. It will
  * house a list of all color-coded transations as well as buttons in the
@@ -134,6 +127,37 @@ public class ReceiptList extends ListActivity {
 		}
 
 	}
+	
+	/***************************************************
+	 * Button Listeners
+	 *************************************************/
+	
+	private class OCRDialogListener implements DialogInterface.OnClickListener{
+
+		private String ocrText;
+		
+		public OCRDialogListener(String ocrText){
+			this.ocrText = ocrText;
+		}
+		@Override
+		public void onClick(DialogInterface dialog, int which) {
+			switch(which){
+				case DialogInterface.BUTTON_POSITIVE:
+					mDb.createReceipt(ocrText.substring(0, Math.min(ocrText.length(), 20)), tempFile);
+					break;
+				case DialogInterface.BUTTON_NEGATIVE:
+					final Resources resources = getApplicationContext().getResources();
+					mDb.createReceipt(resources.getString(R.string.temp_filename), tempFile);
+					break;
+				case DialogInterface.BUTTON_NEUTRAL:
+					break;
+				default:
+					throw new UnsupportedOperationException();
+			}
+			new AsyncCursor().execute(sort, filter, type);
+		}
+		
+	}
 	private static final int ACTION_CAMERA_CAPTURE = 1337;
 	private String tempFile;
 
@@ -163,32 +187,30 @@ public class ReceiptList extends ListActivity {
 			// store the image
 			if (resultCode != RESULT_CANCELED){
 
-
-				// This should be run in a background thread.
-				final Resources resources = getApplicationContext().getResources();
+				
 				mPrefs = getPreferences(Context.MODE_PRIVATE);
 				tempFile = mPrefs.getString("tempFile", null);
 
-				final Bundle extras = intent.getExtras();
-				final Bitmap mImageBitmap = (Bitmap) extras.get("data");
-				try {
-					final FileOutputStream fos = new FileOutputStream(tempFile);
-					mImageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-					fos.close();
-				} catch (final IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-
 				Log.e("ReceiptList","Tempfile : " + tempFile);
-
-				mDb.createReceipt(resources.getString(R.string.temp_filename), tempFile);
-				new AsyncCursor().execute(sort, filter, type);
-			}else{
-				// Image capture cancelled. Don't add an entry to the database.
+				
+				String ocrParsedText = Util.getReceiptText(this, tempFile);
+				
+				Log.e("ReceiptList", ocrParsedText);
+				
+				createAndShowOCRConfirmationDialog(ocrParsedText);				
 			}
 		}
+	}
+
+	private void createAndShowOCRConfirmationDialog(String ocrParsedText) {
+		OCRDialogListener listener = new OCRDialogListener(ocrParsedText);
+		AlertDialog.Builder mAlertBuilder = new AlertDialog.Builder(this);
+		mAlertBuilder.setMessage("Would you like to use the title, '" + ocrParsedText + 
+				"' that we detected from your receipt?").
+				setNeutralButton("Cancel", listener).
+				setNegativeButton("No, thanks", listener).
+				setPositiveButton("Yes!", listener).create().show();
+		
 	}
 
 	@Override
@@ -329,8 +351,7 @@ public class ReceiptList extends ListActivity {
 				// This adds the new file created by the FileDatabaseController to the intent to
 				// take a picture, letting the camera know where to save the image.
 				final Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-				//takePictureIntent.putExtra("filename", outFile.getAbsolutePath());
-				//takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(outFile));
+				takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(outFile));
 
 				// Store the temporary filename so that we can properly add a reference to
 				// it in our database when the camera returns with a success.
@@ -381,13 +402,10 @@ public class ReceiptList extends ListActivity {
 		final List<String> sort = Arrays.asList(getResources().getStringArray(R.array.navDrawerSort));
 		final List<String> filter = Arrays.asList(getResources().getStringArray(R.array.navDrawerFilter));
 		final List<String> business = Arrays.asList(getResources().getStringArray(R.array.navDrawerBusiness));
-//		final List<String> budget = new ArrayList<String>();
-//		budget.add("Begin");
 
 		navChild.put(navHeader.get(0), sort); // Header, Child data
 		navChild.put(navHeader.get(1), filter);
 		navChild.put(navHeader.get(2), business);
-//		navChild.put(navHeader.get(3), budget);
 	}
 
 

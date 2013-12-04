@@ -56,6 +56,37 @@ public class ReceiptList extends ListActivity {
 			}
 		}
 	}
+	/***************************************************
+	 * Button Listeners
+	 *************************************************/
+
+	private class OCRDialogListener implements DialogInterface.OnClickListener{
+
+		private final String ocrText;
+
+		public OCRDialogListener(final String ocrText){
+			this.ocrText = ocrText;
+		}
+		@Override
+		public void onClick(final DialogInterface dialog, final int which) {
+			switch(which){
+			case DialogInterface.BUTTON_POSITIVE:
+				mDb.createReceipt(ocrText.substring(0, Math.min(ocrText.length(), 20)), tempFile);
+				break;
+			case DialogInterface.BUTTON_NEGATIVE:
+				final Resources resources = getApplicationContext().getResources();
+				mDb.createReceipt(resources.getString(R.string.temp_filename), tempFile);
+				break;
+			case DialogInterface.BUTTON_NEUTRAL:
+				break;
+			default:
+				throw new UnsupportedOperationException();
+			}
+			new AsyncCursor().execute(sort, filter, type);
+		}
+
+	}
+
 	/*
 	 * This inner class will be responsible for updating individual list entries
 	 * from XML files.
@@ -127,37 +158,6 @@ public class ReceiptList extends ListActivity {
 		}
 
 	}
-	
-	/***************************************************
-	 * Button Listeners
-	 *************************************************/
-	
-	private class OCRDialogListener implements DialogInterface.OnClickListener{
-
-		private String ocrText;
-		
-		public OCRDialogListener(String ocrText){
-			this.ocrText = ocrText;
-		}
-		@Override
-		public void onClick(DialogInterface dialog, int which) {
-			switch(which){
-				case DialogInterface.BUTTON_POSITIVE:
-					mDb.createReceipt(ocrText.substring(0, Math.min(ocrText.length(), 20)), tempFile);
-					break;
-				case DialogInterface.BUTTON_NEGATIVE:
-					final Resources resources = getApplicationContext().getResources();
-					mDb.createReceipt(resources.getString(R.string.temp_filename), tempFile);
-					break;
-				case DialogInterface.BUTTON_NEUTRAL:
-					break;
-				default:
-					throw new UnsupportedOperationException();
-			}
-			new AsyncCursor().execute(sort, filter, type);
-		}
-		
-	}
 	private static final int ACTION_CAMERA_CAPTURE = 1337;
 	private String tempFile;
 
@@ -168,11 +168,22 @@ public class ReceiptList extends ListActivity {
 
 	private List<String> navHeader;
 	private Map<String, List<String>> navChild;
-	
+
 	// Sort and filter options for the list data.
 	private String sort = "timestamp";
 	private String filter = "No Filter";
 	private String type = "All";
+
+	private void createAndShowOCRConfirmationDialog(final String ocrParsedText) {
+		final OCRDialogListener listener = new OCRDialogListener(ocrParsedText);
+		final AlertDialog.Builder mAlertBuilder = new AlertDialog.Builder(this);
+		mAlertBuilder.setMessage("Would you like to use the title, '" + ocrParsedText +
+				"' that we detected from your receipt?").
+				setNeutralButton("Cancel", listener).
+				setNegativeButton("No, thanks", listener).
+				setPositiveButton("Yes!", listener).create().show();
+
+	}
 
 	/*
 	 * This method will trigger when this activity receives a callback from the camera application
@@ -187,30 +198,19 @@ public class ReceiptList extends ListActivity {
 			// store the image
 			if (resultCode != RESULT_CANCELED){
 
-				
+
 				mPrefs = getPreferences(Context.MODE_PRIVATE);
 				tempFile = mPrefs.getString("tempFile", null);
 
 				Log.e("ReceiptList","Tempfile : " + tempFile);
-				
-				String ocrParsedText = Util.getReceiptText(this, tempFile);
-				
+
+				final String ocrParsedText = Util.getReceiptText(this, tempFile);
+
 				Log.e("ReceiptList", ocrParsedText);
-				
-				createAndShowOCRConfirmationDialog(ocrParsedText);				
+
+				createAndShowOCRConfirmationDialog(ocrParsedText);
 			}
 		}
-	}
-
-	private void createAndShowOCRConfirmationDialog(String ocrParsedText) {
-		OCRDialogListener listener = new OCRDialogListener(ocrParsedText);
-		AlertDialog.Builder mAlertBuilder = new AlertDialog.Builder(this);
-		mAlertBuilder.setMessage("Would you like to use the title, '" + ocrParsedText + 
-				"' that we detected from your receipt?").
-				setNeutralButton("Cancel", listener).
-				setNegativeButton("No, thanks", listener).
-				setPositiveButton("Yes!", listener).create().show();
-		
 	}
 
 	@Override
@@ -230,26 +230,26 @@ public class ReceiptList extends ListActivity {
 		// Set the adapter for the list view
 		mDrawerList.setAdapter(new ExpandableListAdapter(this,
 				navHeader, navChild));
-		
+
 		// Navigation Drawer clickListener for main items
 		mDrawerList.setOnGroupClickListener(new OnGroupClickListener() {
-			
+
 			@Override
-			public boolean onGroupClick(ExpandableListView parent, View v,
-					int groupPosition, long id) {
-				
-				
+			public boolean onGroupClick(final ExpandableListView parent, final View v,
+					final int groupPosition, final long id) {
+
+
 				switch(groupPosition){
-					case 3: // View budget
-						Intent budgetIntent = new Intent(ReceiptList.this, BudgetViewActivity.class);
-						startActivity(budgetIntent);
-						break;
-					case 4: // Export to Server
-						Intent exportIntent = new Intent(ReceiptList.this, ExportService.class);
-						startService(exportIntent);
-						break;
-					default:
-						return false;
+				case 3: // View budget
+					final Intent budgetIntent = new Intent(ReceiptList.this, BudgetViewActivity.class);
+					startActivity(budgetIntent);
+					break;
+				case 4: // Export to Server
+					final Intent exportIntent = new Intent(ReceiptList.this, ExportService.class);
+					startService(exportIntent);
+					break;
+				default:
+					return false;
 				}
 				return true;
 			}
@@ -262,26 +262,26 @@ public class ReceiptList extends ListActivity {
 			public boolean onChildClick(final ExpandableListView parent, final View v,
 					final int groupPosition, final int childPosition, final long id) {
 				switch(groupPosition){
-					case 0: // Sort By
-						sort = navChild.get(navHeader.get(groupPosition)).get(childPosition);
-	
-						if(sort == "Date"){
-							sort = "timestamp";
-						} else if(sort == "Name"){
-							sort = "title";
-						}
-						break;
-						
-					case 1: // Filter By Category
-						filter = navChild.get(navHeader.get(groupPosition)).get(childPosition);
-						break;
-						
-					case 2: // Toggle Business/Casual
-						type = navChild.get(navHeader.get(groupPosition)).get(childPosition);
-						break;
-					
-					default:
-						throw new UnsupportedOperationException("Unsupported Navigation Drawer item selected");
+				case 0: // Sort By
+					sort = navChild.get(navHeader.get(groupPosition)).get(childPosition);
+
+					if(sort == "Date"){
+						sort = "timestamp";
+					} else if(sort == "Name"){
+						sort = "title";
+					}
+					break;
+
+				case 1: // Filter By Category
+					filter = navChild.get(navHeader.get(groupPosition)).get(childPosition);
+					break;
+
+				case 2: // Toggle Business/Casual
+					type = navChild.get(navHeader.get(groupPosition)).get(childPosition);
+					break;
+
+				default:
+					throw new UnsupportedOperationException("Unsupported Navigation Drawer item selected");
 				}
 				new AsyncCursor().execute(sort, filter, type);
 				return true;

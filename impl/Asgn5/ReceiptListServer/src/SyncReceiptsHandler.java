@@ -29,45 +29,47 @@ public class SyncReceiptsHandler implements HttpHandler
 			String req = getStringFromInputStream(exchange.getRequestBody());
 			System.out.println(req);
 			
-			// huge beef here
-//			@SuppressWarnings("unchecked")
-//			Map<String,Object> userData = objMapper.readValue(exchange.getRequestBody(), Map.class);
-//			
-//			String username = (String)userData.get("username");
-//			String password = (String)userData.get("password");
-//			userData.remove("username");
-//			userData.remove("password");
-//			
-//			final String PYTHONPATH = "../../mongo-files";
-//	        final String[] sysPathAppends = PYTHONPATH.split(":");
-//			
-//			JythonObjectFactory receiptsFactory = new JythonObjectFactory(IReceipt.class, "db_interface", "Receipt", sysPathAppends);
-//			JythonObjectFactory accountsFactory = new JythonObjectFactory(IAccountsWrapper.class,"db_interface","AccountsWrapper",sysPathAppends);
-//			
-//	        IAccountsWrapper accounts = (IAccountsWrapper) accountsFactory.createObject();
-//	        
-//	        // May already be present, add just in case
-//	        accounts.add_account(username, password);
-//			
-//			@SuppressWarnings("unchecked")
-//			List<Map<String, Object>> receipts = (List<Map<String, Object>>)userData.get("receipts");
-//			
-//			for (Map<String, Object> receipt : receipts)
-//			{
-//				// No sure if correct order is maintained, so doing it manually.
-//				String[] keys = {"_id", "title", "amount", "filename", "category", "kind", "date"};
-//				Object[] values = new Object[keys.length];
-//				for (int i = 0; i < values.length; i++)
-//				{
-//					values[i] = receipt.get(keys[i]);
-//				}
-//				
-//				IReceipt newReceipt = (IReceipt)receiptsFactory.createObject(values, keys);
-//				accounts.add_receipt(username, password, newReceipt);
-//			}
+			@SuppressWarnings("unchecked")
+			Map<String,Object> userData = objMapper.readValue(req, Map.class);
+			
+			String username = (String)userData.get("username");
+			String password = (String)userData.get("password");
+			userData.remove("username");
+			userData.remove("password");
+			
+	        IAccountsWrapper accounts = (IAccountsWrapper)JythonBackend.createAccountsWrapper().createObject();
+	        
+	        // May already be present, add just in case
+	        accounts.add_account(username, password);
+			
+			@SuppressWarnings("unchecked")
+			List<Map<String, Object>> receipts = (List<Map<String, Object>>)userData.get("receipts");
+			
+			JythonObjectFactory receiptsFactory = JythonBackend.getReceiptFactory();
+			
+			// will act as a 'dirty bit' that becomes false if a receipt couldn't be added
+			boolean allAdded = true;
+			for (Map<String, Object> receipt : receipts)
+			{
+				// No sure if correct order is maintained, so doing it manually.
+				String[] keys = {"_id", "title", "amount", "filename", "category", "kind", "date"};
+				Object[] values = new Object[keys.length];
+				for (int i = 0; i < values.length; i++)
+				{
+					values[i] = receipt.get(keys[i]);
+				}
+				
+				IReceipt newReceipt = (IReceipt)receiptsFactory.createObject(values, keys);
+				boolean added = accounts.add_receipt(username, password, newReceipt);
+				if (added == false)
+				{
+					allAdded = false;
+					System.out.println("Receipt with id " + values[0] + "wasn't added!");
+				}
+			}
 			
 			Map<String, Boolean> resp = new LinkedHashMap<String, Boolean>();
-			resp.put("success", true); // for now...
+			resp.put("success", allAdded); // for now...
 			
 			String rtn = objMapper.writeValueAsString(resp);
 			System.out.println("response: " + rtn);

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -20,17 +19,14 @@ public class AllReceiptsHandler implements HttpHandler
 		if (method.equals("GET"))
 		{
 			System.out.println("GET /user");
-			String response = "response: \n";
+			String response = "";
 			
 			String parameters = exchange.getRequestURI().getQuery();
+			
 			Map<String, String> map = getParameters(parameters);
+			System.out.println("username=" + map.get("username") + "\npassword=" + map.get("password"));
 			
-			final String PYTHONPATH = "../../mongo-files";
-	        final String[] sysPathAppends = PYTHONPATH.split(":");
-	     
-			
-			//JythonObjectFactory receiptsFactory = new JythonObjectFactory(IReceipt.class, "db_interface", "Receipt", sysPathAppends);
-			JythonObjectFactory accountsFactory = new JythonObjectFactory(IAccountsWrapper.class,"db_interface","AccountsWrapper",sysPathAppends);
+			JythonObjectFactory accountsFactory = JythonBackend.createAccountsWrapper();
 			
 	        IAccountsWrapper accounts = (IAccountsWrapper) accountsFactory.createObject();
 			
@@ -66,7 +62,7 @@ public class AllReceiptsHandler implements HttpHandler
 			System.out.println(response);
 			
 			Headers responseHeaders = exchange.getResponseHeaders();
-			responseHeaders.set("Content-Type", "text/plain");
+			responseHeaders.set("Content-Type", "text/html");
 			exchange.sendResponseHeaders(200, 0);
 			OutputStream responseBody = exchange.getResponseBody();
 			responseBody.write(response.getBytes());
@@ -78,8 +74,34 @@ public class AllReceiptsHandler implements HttpHandler
 	
 	private String generateHTML(List<IReceipt> receipts) throws JsonProcessingException
 	{
-		ObjectMapper om = new ObjectMapper();
-		return om.writeValueAsString(receipts);
+		String rtn = "<html>";
+		for (IReceipt r : receipts)
+		{
+			rtn += buildReceiptHTML(r);
+			rtn += "<p>\n";
+		}
+		
+		rtn += "</html>";
+		
+		return rtn;
+	}
+	
+	private String buildReceiptHTML(IReceipt rec)
+	{
+		String rtn = "";
+		Map<String, String> data = rec.serialize();
+		
+		rtn += "<h4>" + data.get("title") + "</h4>\n";
+		data.remove("title");
+		
+		rtn += "<ul>\n";
+		for (String key : data.keySet())
+		{
+			rtn += "<li><b>" + key + "</b> = " + data.get(key) + "</li>\n";
+		}
+		rtn += "</ul>\n";
+		
+		return rtn;
 	}
 	
 	private Map<String, String> getParameters(String query)

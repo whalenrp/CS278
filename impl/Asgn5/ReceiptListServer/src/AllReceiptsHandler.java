@@ -75,6 +75,7 @@ public class AllReceiptsHandler implements HttpHandler
 	private String generateHTML(List<IReceipt> receipts) throws JsonProcessingException
 	{
 		String rtn = "<html>";
+		rtn += "<img src=\"../res/banner.png\" alt=\"banner\">\n";
 		for (IReceipt r : receipts)
 		{
 			rtn += buildReceiptHTML(r);

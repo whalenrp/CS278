@@ -71,11 +71,11 @@ public class AllReceiptsHandler implements HttpHandler
 			System.out.println("Finished GET processing");
 		}
 	}
-	
+	// Horrible, horrible things happening here	
 	private String generateHTML(List<IReceipt> receipts) throws JsonProcessingException
 	{
 		String rtn = "<html>";
-		rtn += "<img src=\"../res/banner.png\" alt=\"banner\">\n";
+		rtn += "<img src=\"http://i.minus.com/ixI2b731j8hDx.png\" algt=\"banner\">\n";
 		for (IReceipt r : receipts)
 		{
 			rtn += buildReceiptHTML(r);
